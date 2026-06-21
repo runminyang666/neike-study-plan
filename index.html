@@ -55,11 +55,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
 .date-nav .date-label{font-size:14px;font-weight:500;min-width:130px;text-align:center}
 .date-nav .today-btn{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4)}
 .date-nav .today-btn:hover{background:rgba(255,255,255,0.35)}
-.sync-bar{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-bottom:2px;padding:3px 0}
-.sync-btn{padding:3px 10px;font-size:11px;background:#2c7da0;color:white;border:none;border-radius:10px;cursor:pointer;transition:background 0.2s}
-.sync-btn:hover{background:#1a5276}
-.sync-btn:disabled{background:#80b5cc;cursor:default}
-.sync-status{font-size:11px;color:#7a9bb5}
 </style>
 </head>
 <body>
@@ -81,10 +76,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
     <span class="date-label" id="dayLabel">第 1 天</span>
     <button onclick="nextDay()">后一天 ›</button>
     <button class="today-btn" onclick="goToToday()" title="回到当前日期">● 今天</button>
-</div>
-<div class="sync-bar">
-    <span class="sync-status" id="syncStatus"></span>
-    <button class="sync-btn" id="syncBtn" onclick="syncFromCalendar()">📅 同步今日任务</button>
 </div>
 
 <div class="day-progress-bg"><div class="day-progress-fill" id="progressFill"></div></div>
@@ -113,11 +104,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
 var planData = [{"d": 1, "s": "1.COPD"}, {"d": 2, "s": "2.肺动脉高压", "r": [{"rd": 1, "rs": "1.COPD"}]}, {"d": 3, "s": "3.急性肺血栓栓塞症", "r": [{"rd": 2, "rs": "2.肺动脉高压"}, {"rd": 1, "rs": "1.COPD"}]}, {"d": 4, "s": "4.间质性肺疾病", "r": [{"rd": 3, "rs": "3.急性肺血栓栓塞症"}, {"rd": 2, "rs": "2.肺动脉高压"}]}, {"d": 5, "s": "5.支气管扩张症", "r": [{"rd": 4, "rs": "4.间质性肺疾病"}, {"rd": 3, "rs": "3.急性肺血栓栓塞症"}, {"rd": 1, "rs": "1.COPD"}]}, {"d": 6, "s": "6.急性肺脓肿", "r": [{"rd": 5, "rs": "5.支气管扩张症"}, {"rd": 4, "rs": "4.间质性肺疾病"}, {"rd": 2, "rs": "2.肺动脉高压"}]}, {"d": 7, "s": "7.肺炎", "r": [{"rd": 6, "rs": "6.急性肺脓肿"}, {"rd": 5, "rs": "5.支气管扩张症"}, {"rd": 3, "rs": "3.急性肺血栓栓塞症"}]}, {"d": 8, "s": "8.肺结核", "r": [{"rd": 7, "rs": "7.肺炎"}, {"rd": 6, "rs": "6.急性肺脓肿"}, {"rd": 4, "rs": "4.间质性肺疾病"}, {"rd": 1, "rs": "1.COPD"}]}, {"d": 9, "s": "9.支气管哮喘", "r": [{"rd": 8, "rs": "8.肺结核"}, {"rd": 7, "rs": "7.肺炎"}, {"rd": 5, "rs": "5.支气管扩张症"}, {"rd": 2, "rs": "2.肺动脉高压"}]}, {"d": 10, "s": "10.ARDS", "r": [{"rd": 9, "rs": "9.支气管哮喘"}, {"rd": 8, "rs": "8.肺结核"}, {"rd": 6, "rs": "6.急性肺脓肿"}, {"rd": 3, "rs": "3.急性肺血栓栓塞症"}]}, {"d": 11, "s": "11.呼吸衰竭", "r": [{"rd": 10, "rs": "10.ARDS"}, {"rd": 9, "rs": "9.支气管哮喘"}, {"rd": 7, "rs": "7.肺炎"}, {"rd": 4, "rs": "4.间质性肺疾病"}]}, {"d": 12, "s": "12.肺癌", "r": [{"rd": 11, "rs": "11.呼吸衰竭"}, {"rd": 10, "rs": "10.ARDS"}, {"rd": 8, "rs": "8.肺结核"}, {"rd": 5, "rs": "5.支气管扩张症"}]}, {"d": 13, "s": "13.胸膜疾病", "r": [{"rd": 12, "rs": "12.肺癌"}, {"rd": 11, "rs": "11.呼吸衰竭"}, {"rd": 9, "rs": "9.支气管哮喘"}, {"rd": 6, "rs": "6.急性肺脓肿"}]}, {"d": 14, "s": "14.胃食管反流", "r": [{"rd": 13, "rs": "13.胸膜疾病"}, {"rd": 12, "rs": "12.肺癌"}, {"rd": 10, "rs": "10.ARDS"}, {"rd": 7, "rs": "7.肺炎"}]}, {"d": 15, "s": "15.胃炎", "r": [{"rd": 14, "rs": "14.胃食管反流"}, {"rd": 13, "rs": "13.胸膜疾病"}, {"rd": 11, "rs": "11.呼吸衰竭"}, {"rd": 8, "rs": "8.肺结核"}]}, {"d": 16, "s": "16.消化性溃疡&消化道出血", "r": [{"rd": 15, "rs": "15.胃炎"}, {"rd": 14, "rs": "14.胃食管反流"}, {"rd": 12, "rs": "12.肺癌"}, {"rd": 9, "rs": "9.支气管哮喘"}, {"rd": 1, "rs": "1.COPD"}]}, {"d": 17, "s": "17.肠结核&结核性腹膜炎", "r": [{"rd": 16, "rs": "16.消化性溃疡&消化道出血"}, {"rd": 15, "rs": "15.胃炎"}, {"rd": 13, "rs": "13.胸膜疾病"}, {"rd": 10, "rs": "10.ARDS"}, {"rd": 2, "rs": "2.肺动脉高压"}]}, {"d": 18, "s": "18.炎症性肠病", "r": [{"rd": 17, "rs": "17.肠结核&结核性腹膜炎"}, {"rd": 16, "rs": "16.消化性溃疡&消化道出血"}, {"rd": 14, "rs": "14.胃食管反流"}, {"rd": 11, "rs": "11.呼吸衰竭"}, {"rd": 3, "rs": "3.急性肺血栓栓塞症"}]}, {"d": 19, "s": "19.肠易激综合征", "r": [{"rd": 18, "rs": "18.炎症性肠病"}, {"rd": 17, "rs": "17.肠结核&结核性腹膜炎"}, {"rd": 15, "rs": "15.胃炎"}, {"rd": 12, "rs": "12.肺癌"}, {"rd": 4, "rs": "4.间质性肺疾病"}]}, {"d": 20, "s": "20.肝性脑病", "r": [{"rd": 19, "rs": "19.肠易激综合征"}, {"rd": 18, "rs": "18.炎症性肠病"}, {"rd": 16, "rs": "16.消化性溃疡&消化道出血"}, {"rd": 13, "rs": "13.胸膜疾病"}, {"rd": 5, "rs": "5.支气管扩张症"}]}, {"d": 21, "s": "21.原发性肝癌", "r": [{"rd": 20, "rs": "20.肝性脑病"}, {"rd": 19, "rs": "19.肠易激综合征"}, {"rd": 17, "rs": "17.肠结核&结核性腹膜炎"}, {"rd": 14, "rs": "14.胃食管反流"}, {"rd": 6, "rs": "6.急性肺脓肿"}]}, {"d": 22, "s": "22.肝硬化", "r": [{"rd": 21, "rs": "21.原发性肝癌"}, {"rd": 20, "rs": "20.肝性脑病"}, {"rd": 18, "rs": "18.炎症性肠病"}, {"rd": 15, "rs": "15.胃炎"}, {"rd": 7, "rs": "7.肺炎"}]}, {"d": 23, "s": "23.胰腺炎", "r": [{"rd": 22, "rs": "22.肝硬化"}, {"rd": 21, "rs": "21.原发性肝癌"}, {"rd": 19, "rs": "19.肠易激综合征"}, {"rd": 16, "rs": "16.消化性溃疡&消化道出血"}, {"rd": 8, "rs": "8.肺结核"}]}, {"d": 24, "s": "24.泌尿系统总论", "r": [{"rd": 23, "rs": "23.胰腺炎"}, {"rd": 22, "rs": "22.肝硬化"}, {"rd": 20, "rs": "20.肝性脑病"}, {"rd": 17, "rs": "17.肠结核&结核性腹膜炎"}, {"rd": 9, "rs": "9.支气管哮喘"}]}, {"d": 25, "s": "25.尿路感染", "r": [{"rd": 24, "rs": "24.泌尿系统总论"}, {"rd": 23, "rs": "23.胰腺炎"}, {"rd": 21, "rs": "21.原发性肝癌"}, {"rd": 18, "rs": "18.炎症性肠病"}, {"rd": 10, "rs": "10.ARDS"}]}, {"d": 26, "s": "26.肾衰竭", "r": [{"rd": 25, "rs": "25.尿路感染"}, {"rd": 24, "rs": "24.泌尿系统总论"}, {"rd": 22, "rs": "22.肝硬化"}, {"rd": 19, "rs": "19.肠易激综合征"}, {"rd": 11, "rs": "11.呼吸衰竭"}]}, {"d": 27, "s": "27.原发性肾小球疾病", "r": [{"rd": 26, "rs": "26.肾衰竭"}, {"rd": 25, "rs": "25.尿路感染"}, {"rd": 23, "rs": "23.胰腺炎"}, {"rd": 20, "rs": "20.肝性脑病"}, {"rd": 12, "rs": "12.肺癌"}]}, {"d": 28, "s": "28.缺铁性贫血", "r": [{"rd": 27, "rs": "27.原发性肾小球疾病"}, {"rd": 26, "rs": "26.肾衰竭"}, {"rd": 24, "rs": "24.泌尿系统总论"}, {"rd": 21, "rs": "21.原发性肝癌"}, {"rd": 13, "rs": "13.胸膜疾病"}]}, {"d": 29, "s": "29.再生障碍性贫血", "r": [{"rd": 28, "rs": "28.缺铁性贫血"}, {"rd": 27, "rs": "27.原发性肾小球疾病"}, {"rd": 25, "rs": "25.尿路感染"}, {"rd": 22, "rs": "22.肝硬化"}, {"rd": 14, "rs": "14.胃食管反流"}]}, {"d": 30, "s": "30.溶血性贫血", "r": [{"rd": 29, "rs": "29.再生障碍性贫血"}, {"rd": 28, "rs": "28.缺铁性贫血"}, {"rd": 26, "rs": "26.肾衰竭"}, {"rd": 23, "rs": "23.胰腺炎"}, {"rd": 15, "rs": "15.胃炎"}]}, {"d": 31, "s": "31.出血性疾病", "r": [{"rd": 30, "rs": "30.溶血性贫血"}, {"rd": 29, "rs": "29.再生障碍性贫血"}, {"rd": 27, "rs": "27.原发性肾小球疾病"}, {"rd": 24, "rs": "24.泌尿系统总论"}, {"rd": 16, "rs": "16.消化性溃疡&消化道出血"}, {"rd": 1, "rs": "1.COPD"}]}, {"d": 32, "s": "32.骨髓瘤", "r": [{"rd": 31, "rs": "31.出血性疾病"}, {"rd": 30, "rs": "30.溶血性贫血"}, {"rd": 28, "rs": "28.缺铁性贫血"}, {"rd": 25, "rs": "25.尿路感染"}, {"rd": 17, "rs": "17.肠结核&结核性腹膜炎"}, {"rd": 2, "rs": "2.肺动脉高压"}]}, {"d": 33, "s": "33.白血病", "r": [{"rd": 32, "rs": "32.骨髓瘤"}, {"rd": 31, "rs": "31.出血性疾病"}, {"rd": 29, "rs": "29.再生障碍性贫血"}, {"rd": 26, "rs": "26.肾衰竭"}, {"rd": 18, "rs": "18.炎症性肠病"}, {"rd": 3, "rs": "3.急性肺血栓栓塞症"}]}, {"d": 34, "s": "34.淋巴瘤", "r": [{"rd": 33, "rs": "33.白血病"}, {"rd": 32, "rs": "32.骨髓瘤"}, {"rd": 30, "rs": "30.溶血性贫血"}, {"rd": 27, "rs": "27.原发性肾小球疾病"}, {"rd": 19, "rs": "19.肠易激综合征"}, {"rd": 4, "rs": "4.间质性肺疾病"}]}, {"d": 35, "s": "35.Graves病", "r": [{"rd": 34, "rs": "34.淋巴瘤"}, {"rd": 33, "rs": "33.白血病"}, {"rd": 31, "rs": "31.出血性疾病"}, {"rd": 28, "rs": "28.缺铁性贫血"}, {"rd": 20, "rs": "20.肝性脑病"}, {"rd": 5, "rs": "5.支气管扩张症"}]}, {"d": 36, "s": "36.甲状腺功能减退症", "r": [{"rd": 35, "rs": "35.Graves病"}, {"rd": 34, "rs": "34.淋巴瘤"}, {"rd": 32, "rs": "32.骨髓瘤"}, {"rd": 29, "rs": "29.再生障碍性贫血"}, {"rd": 21, "rs": "21.原发性肝癌"}, {"rd": 6, "rs": "6.急性肺脓肿"}]}, {"d": 37, "s": "37.糖尿病", "r": [{"rd": 36, "rs": "36.甲状腺功能减退症"}, {"rd": 35, "rs": "35.Graves病"}, {"rd": 33, "rs": "33.白血病"}, {"rd": 30, "rs": "30.溶血性贫血"}, {"rd": 22, "rs": "22.肝硬化"}, {"rd": 7, "rs": "7.肺炎"}]}, {"d": 38, "s": "38.原发性醛固酮增多症", "r": [{"rd": 37, "rs": "37.糖尿病"}, {"rd": 36, "rs": "36.甲状腺功能减退症"}, {"rd": 34, "rs": "34.淋巴瘤"}, {"rd": 31, "rs": "31.出血性疾病"}, {"rd": 23, "rs": "23.胰腺炎"}, {"rd": 8, "rs": "8.肺结核"}]}, {"d": 39, "s": "39.库欣综合征", "r": [{"rd": 38, "rs": "38.原发性醛固酮增多症"}, {"rd": 37, "rs": "37.糖尿病"}, {"rd": 35, "rs": "35.Graves病"}, {"rd": 32, "rs": "32.骨髓瘤"}, {"rd": 24, "rs": "24.泌尿系统总论"}, {"rd": 9, "rs": "9.支气管哮喘"}]}, {"d": 40, "s": "40.嗜铬细胞瘤", "r": [{"rd": 39, "rs": "39.库欣综合征"}, {"rd": 38, "rs": "38.原发性醛固酮增多症"}, {"rd": 36, "rs": "36.甲状腺功能减退症"}, {"rd": 33, "rs": "33.白血病"}, {"rd": 25, "rs": "25.尿路感染"}, {"rd": 10, "rs": "10.ARDS"}]}, {"d": 41, "s": "41.内分泌系统总论", "r": [{"rd": 40, "rs": "40.嗜铬细胞瘤"}, {"rd": 39, "rs": "39.库欣综合征"}, {"rd": 37, "rs": "37.糖尿病"}, {"rd": 34, "rs": "34.淋巴瘤"}, {"rd": 26, "rs": "26.肾衰竭"}, {"rd": 11, "rs": "11.呼吸衰竭"}]}, {"d": 42, "s": "42.风湿系统总论", "r": [{"rd": 41, "rs": "41.内分泌系统总论"}, {"rd": 40, "rs": "40.嗜铬细胞瘤"}, {"rd": 38, "rs": "38.原发性醛固酮增多症"}, {"rd": 35, "rs": "35.Graves病"}, {"rd": 27, "rs": "27.原发性肾小球疾病"}, {"rd": 12, "rs": "12.肺癌"}]}, {"d": 43, "s": "43.系统性红斑狼疮", "r": [{"rd": 42, "rs": "42.风湿系统总论"}, {"rd": 41, "rs": "41.内分泌系统总论"}, {"rd": 39, "rs": "39.库欣综合征"}, {"rd": 36, "rs": "36.甲状腺功能减退症"}, {"rd": 28, "rs": "28.缺铁性贫血"}, {"rd": 13, "rs": "13.胸膜疾病"}]}, {"d": 44, "s": "44.类风湿关节炎", "r": [{"rd": 43, "rs": "43.系统性红斑狼疮"}, {"rd": 42, "rs": "42.风湿系统总论"}, {"rd": 40, "rs": "40.嗜铬细胞瘤"}, {"rd": 37, "rs": "37.糖尿病"}, {"rd": 29, "rs": "29.再生障碍性贫血"}, {"rd": 14, "rs": "14.胃食管反流"}]}, {"d": 45, "s": "45.原发性干燥综合征", "r": [{"rd": 44, "rs": "44.类风湿关节炎"}, {"rd": 43, "rs": "43.系统性红斑狼疮"}, {"rd": 41, "rs": "41.内分泌系统总论"}, {"rd": 38, "rs": "38.原发性醛固酮增多症"}, {"rd": 30, "rs": "30.溶血性贫血"}, {"rd": 15, "rs": "15.胃炎"}]}, {"d": 46, "s": "46.系统性血管炎", "r": [{"rd": 45, "rs": "45.原发性干燥综合征"}, {"rd": 44, "rs": "44.类风湿关节炎"}, {"rd": 42, "rs": "42.风湿系统总论"}, {"rd": 39, "rs": "39.库欣综合征"}, {"rd": 31, "rs": "31.出血性疾病"}, {"rd": 16, "rs": "16.消化性溃疡&消化道出血"}]}, {"d": 47, "s": "47.心肌疾病", "r": [{"rd": 46, "rs": "46.系统性血管炎"}, {"rd": 45, "rs": "45.原发性干燥综合征"}, {"rd": 43, "rs": "43.系统性红斑狼疮"}, {"rd": 40, "rs": "40.嗜铬细胞瘤"}, {"rd": 32, "rs": "32.骨髓瘤"}, {"rd": 17, "rs": "17.肠结核&结核性腹膜炎"}]}, {"d": 48, "s": "48.心包疾病", "r": [{"rd": 47, "rs": "47.心肌疾病"}, {"rd": 46, "rs": "46.系统性血管炎"}, {"rd": 44, "rs": "44.类风湿关节炎"}, {"rd": 41, "rs": "41.内分泌系统总论"}, {"rd": 33, "rs": "33.白血病"}, {"rd": 18, "rs": "18.炎症性肠病"}]}, {"d": 49, "s": "49.感染性心内膜炎", "r": [{"rd": 48, "rs": "48.心包疾病"}, {"rd": 47, "rs": "47.心肌疾病"}, {"rd": 45, "rs": "45.原发性干燥综合征"}, {"rd": 42, "rs": "42.风湿系统总论"}, {"rd": 34, "rs": "34.淋巴瘤"}, {"rd": 19, "rs": "19.肠易激综合征"}]}, {"d": 50, "s": "50.高血压", "r": [{"rd": 49, "rs": "49.感染性心内膜炎"}, {"rd": 48, "rs": "48.心包疾病"}, {"rd": 46, "rs": "46.系统性血管炎"}, {"rd": 43, "rs": "43.系统性红斑狼疮"}, {"rd": 35, "rs": "35.Graves病"}, {"rd": 20, "rs": "20.肝性脑病"}]}, {"d": 51, "s": "51.心瓣膜病", "r": [{"rd": 50, "rs": "50.高血压"}, {"rd": 49, "rs": "49.感染性心内膜炎"}, {"rd": 47, "rs": "47.心肌疾病"}, {"rd": 44, "rs": "44.类风湿关节炎"}, {"rd": 36, "rs": "36.甲状腺功能减退症"}, {"rd": 21, "rs": "21.原发性肝癌"}]}, {"d": 52, "s": "52.冠心病", "r": [{"rd": 51, "rs": "51.心瓣膜病"}, {"rd": 50, "rs": "50.高血压"}, {"rd": 48, "rs": "48.心包疾病"}, {"rd": 45, "rs": "45.原发性干燥综合征"}, {"rd": 37, "rs": "37.糖尿病"}, {"rd": 22, "rs": "22.肝硬化"}]}, {"d": 53, "s": "53.收缩性心衰", "r": [{"rd": 52, "rs": "52.冠心病"}, {"rd": 51, "rs": "51.心瓣膜病"}, {"rd": 49, "rs": "49.感染性心内膜炎"}, {"rd": 46, "rs": "46.系统性血管炎"}, {"rd": 38, "rs": "38.原发性醛固酮增多症"}, {"rd": 23, "rs": "23.胰腺炎"}]}, {"d": 54, "s": "54.心律失常", "r": [{"rd": 53, "rs": "53.收缩性心衰"}, {"rd": 52, "rs": "52.冠心病"}, {"rd": 50, "rs": "50.高血压"}, {"rd": 47, "rs": "47.心肌疾病"}, {"rd": 39, "rs": "39.库欣综合征"}, {"rd": 24, "rs": "24.泌尿系统总论"}]}, {"d": 55, "s": "55.心脏骤停", "r": [{"rd": 54, "rs": "54.心律失常"}, {"rd": 53, "rs": "53.收缩性心衰"}, {"rd": 51, "rs": "51.心瓣膜病"}, {"rd": 48, "rs": "48.心包疾病"}, {"rd": 40, "rs": "40.嗜铬细胞瘤"}, {"rd": 25, "rs": "25.尿路感染"}]}, {"d": 56, "s": "56.中毒", "r": [{"rd": 55, "rs": "55.心脏骤停"}, {"rd": 54, "rs": "54.心律失常"}, {"rd": 52, "rs": "52.冠心病"}, {"rd": 49, "rs": "49.感染性心内膜炎"}, {"rd": 41, "rs": "41.内分泌系统总论"}, {"rd": 26, "rs": "26.肾衰竭"}]}, {"d": 57, "r": [{"rd": 56, "rs": "56.中毒"}, {"rd": 55, "rs": "55.心脏骤停"}, {"rd": 53, "rs": "53.收缩性心衰"}, {"rd": 50, "rs": "50.高血压"}, {"rd": 42, "rs": "42.风湿系统总论"}, {"rd": 27, "rs": "27.原发性肾小球疾病"}]}, {"d": 58, "r": [{"rd": 56, "rs": "56.中毒"}, {"rd": 54, "rs": "54.心律失常"}, {"rd": 51, "rs": "51.心瓣膜病"}, {"rd": 43, "rs": "43.系统性红斑狼疮"}, {"rd": 28, "rs": "28.缺铁性贫血"}]}, {"d": 59, "r": [{"rd": 55, "rs": "55.心脏骤停"}, {"rd": 52, "rs": "52.冠心病"}, {"rd": 44, "rs": "44.类风湿关节炎"}, {"rd": 29, "rs": "29.再生障碍性贫血"}]}, {"d": 60, "r": [{"rd": 56, "rs": "56.中毒"}, {"rd": 53, "rs": "53.收缩性心衰"}, {"rd": 45, "rs": "45.原发性干燥综合征"}, {"rd": 30, "rs": "30.溶血性贫血"}]}, {"d": 61, "r": [{"rd": 54, "rs": "54.心律失常"}, {"rd": 46, "rs": "46.系统性血管炎"}, {"rd": 31, "rs": "31.出血性疾病"}]}, {"d": 62, "r": [{"rd": 55, "rs": "55.心脏骤停"}, {"rd": 47, "rs": "47.心肌疾病"}, {"rd": 32, "rs": "32.骨髓瘤"}]}, {"d": 63, "r": [{"rd": 56, "rs": "56.中毒"}, {"rd": 48, "rs": "48.心包疾病"}, {"rd": 33, "rs": "33.白血病"}]}, {"d": 64, "r": [{"rd": 49, "rs": "49.感染性心内膜炎"}, {"rd": 34, "rs": "34.淋巴瘤"}]}, {"d": 65, "r": [{"rd": 50, "rs": "50.高血压"}, {"rd": 35, "rs": "35.Graves病"}]}, {"d": 66, "r": [{"rd": 51, "rs": "51.心瓣膜病"}, {"rd": 36, "rs": "36.甲状腺功能减退症"}]}, {"d": 67, "r": [{"rd": 52, "rs": "52.冠心病"}, {"rd": 37, "rs": "37.糖尿病"}]}, {"d": 68, "r": [{"rd": 53, "rs": "53.收缩性心衰"}, {"rd": 38, "rs": "38.原发性醛固酮增多症"}]}, {"d": 69, "r": [{"rd": 54, "rs": "54.心律失常"}, {"rd": 39, "rs": "39.库欣综合征"}]}, {"d": 70, "r": [{"rd": 55, "rs": "55.心脏骤停"}, {"rd": 40, "rs": "40.嗜铬细胞瘤"}]}, {"d": 71, "r": [{"rd": 56, "rs": "56.中毒"}, {"rd": 41, "rs": "41.内分泌系统总论"}]}, {"d": 72, "r": [{"rd": 42, "rs": "42.风湿系统总论"}]}, {"d": 73, "r": [{"rd": 43, "rs": "43.系统性红斑狼疮"}]}, {"d": 74, "r": [{"rd": 44, "rs": "44.类风湿关节炎"}]}, {"d": 75, "r": [{"rd": 45, "rs": "45.原发性干燥综合征"}]}, {"d": 76, "r": [{"rd": 46, "rs": "46.系统性血管炎"}]}, {"d": 77, "r": [{"rd": 47, "rs": "47.心肌疾病"}]}, {"d": 78, "r": [{"rd": 48, "rs": "48.心包疾病"}]}, {"d": 79, "r": [{"rd": 49, "rs": "49.感染性心内膜炎"}]}, {"d": 80, "r": [{"rd": 50, "rs": "50.高血压"}]}, {"d": 81, "r": [{"rd": 51, "rs": "51.心瓣膜病"}]}, {"d": 82, "r": [{"rd": 52, "rs": "52.冠心病"}]}, {"d": 83, "r": [{"rd": 53, "rs": "53.收缩性心衰"}]}, {"d": 84, "r": [{"rd": 54, "rs": "54.心律失常"}]}, {"d": 85, "r": [{"rd": 55, "rs": "55.心脏骤停"}]}, {"d": 86, "r": [{"rd": 56, "rs": "56.中毒"}]}];
 
 function getState(){
-  try{
-    var r=localStorage.getItem("neike_plan_state");
-    if(r){var s=JSON.parse(r);if(s.startDate)return s}
-  }catch(e){}
-  return null
+  try{var r=localStorage.getItem("neike_plan_state");if(r){var s=JSON.parse(r);if(s.startDate)return s}}catch(e){}return null
 }
 function saveState(s){localStorage.setItem("neike_plan_state",JSON.stringify(s))}
 function getDayKey(d){return"day_"+d}
@@ -142,7 +129,6 @@ function render(){
     return
   }
   var pd=getTodayPlanDay();
-  // Use stored viewDay if set, otherwise use today's plan day
   if(s.viewDay!==undefined)pd=s.viewDay;
   var td=planData.find(function(d){return d.d===pd});
   if(!td){
@@ -159,12 +145,9 @@ function render(){
   document.getElementById("dayLabel").textContent="第 "+pd+" 天";
   document.getElementById("dayInfo").textContent="第 "+pd+" 天 / 共 86 天";
   document.getElementById("progressFill").style.width=(pd/86*100)+"%";
-  
   var tk=getDayKey(pd);
   if(!s.completed)s.completed={};
   if(!s.customTasks)s.customTasks={};
-  
-  // Study content
   var sd=document.getElementById("studyContent");
   var ss=document.getElementById("studySection");
   if(td.s){
@@ -172,11 +155,7 @@ function render(){
     var di=tk+"_study";
     var dn=s.completed[di]===true;
     sd.innerHTML='<div class="task-item"><div class="checkbox'+(dn?' checked':'')+'" onclick="toggleTask(\''+di+'\')"></div><div class="task-text'+(dn?' done':'')+'"><span class="task-label">新学习</span>'+td.s+'</div></div>'
-  }else{
-    ss.style.display="none"
-  }
-  
-  // Review items
+  }else{ss.style.display="none"}
   var rd=document.getElementById("reviewContent");
   if(td.r&&td.r.length>0){
     rd.innerHTML=td.r.map(function(r){
@@ -184,24 +163,16 @@ function render(){
       var dn=s.completed[di]===true;
       return '<div class="task-item"><div class="checkbox'+(dn?' checked':'')+'" onclick="toggleTask(\''+di+'\')"></div><div class="task-text'+(dn?' done':'')+'"><span class="task-label">复习</span>'+r.rs+'<div style="font-size:11px;color:#99b0c5;margin-top:2px">第'+r.rd+'天</div></div></div>'
     }).join("")
-  }else{
-    rd.innerHTML='<div class="empty-state"><div class="icon">🎯</div><div>今天没有复习任务</div></div>'
-  }
-  
-  // Custom tasks
+  }else{rd.innerHTML='<div class="empty-state"><div class="icon">🎯</div><div>今天没有复习任务</div></div>'}
   renderCustomTasks(s,tk);
   updateStats(s,tk,td)
 }
 function renderCustomTasks(s,tk){
   var tasks=s.customTasks[tk]||[];
   var div=document.getElementById("customTasks");
-  if(tasks.length===0){
-    div.innerHTML='<div class="empty-state"><div class="icon">📋</div><div>暂无其他任务</div></div>';
-    return
-  }
+  if(tasks.length===0){div.innerHTML='<div class="empty-state"><div class="icon">📋</div><div>暂无其他任务</div></div>';return}
   div.innerHTML=tasks.map(function(t,i){
-    var di=tk+"_custom_"+i;
-    var dn=s.completed[di]===true;
+    var di=tk+"_custom_"+i;var dn=s.completed[di]===true;
     return '<div class="task-item"><div class="checkbox'+(dn?' checked':'')+'" onclick="toggleTask(\''+di+'\')"></div><div class="task-text'+(dn?' done':'')+'">'+t.text+'</div><div class="delete-btn" onclick="removeCustomTask('+i+')">×</div></div>'
   }).join("")
 }
@@ -213,37 +184,6 @@ function updateStats(s,tk,td){
   document.getElementById("completedCount").textContent=done;
   document.getElementById("totalCount").textContent=total
 }
-
-function prevDay(){
-  var s=getState();if(!s)return;
-  var pd=getTodayPlanDay();
-  if(s.viewDay!==undefined)pd=s.viewDay;
-  if(pd>1){pd--;s.viewDay=pd;saveState(s);render()}
-}
-function nextDay(){
-  var s=getState();if(!s)return;
-  var pd=getTodayPlanDay();
-  if(s.viewDay!==undefined)pd=s.viewDay;
-  if(pd<86){pd++;s.viewDay=pd;saveState(s);render()}
-}
-function goToToday(){
-  var s=getState();if(!s)return;
-  delete s.viewDay;saveState(s);render()
-}
-function syncFromCalendar(){
-  var btn=document.getElementById("syncBtn");var st=document.getElementById("syncStatus");
-  btn.disabled=true;st.textContent="同步中...";
-  fetch("/api/sync").then(function(r){return r.json()}).then(function(data){
-    if(data.success&&data.tasks&&data.tasks.length>0){
-      var s=getState();if(!s)return;
-      var pd=getTodayPlanDay();var tk="day_"+pd;
-      if(!s.customTasks)s.customTasks={};if(!s.customTasks[tk])s.customTasks[tk]=[];
-      data.tasks.forEach(function(t){if(t.length>3)s.customTasks[tk].push({text:"📅 "+t})});
-      saveState(s);st.textContent="已同步 "+data.tasks.length+" 项任务";render()
-    }else{st.textContent="同步失败，暂无数据"}
-    btn.disabled=false
-  }).catch(function(){st.textContent="同步失败，请检查网络";btn.disabled=false})
-}
 function startPlan(){
   var s=getState();
   if(s&&s.startDate&&!confirm("已有进度，确定重新开始吗？"))return;
@@ -252,12 +192,10 @@ function startPlan(){
 }
 function toggleTask(id){
   var s=getState();if(!s)return;
-  if(!s.completed)s.completed={};
-  s.completed[id]=!s.completed[id];saveState(s);render()
+  if(!s.completed)s.completed={};s.completed[id]=!s.completed[id];saveState(s);render()
 }
 function addCustomTask(){
-  var inp=document.getElementById("newTaskInput");
-  var txt=inp.value.trim();if(!txt)return;
+  var inp=document.getElementById("newTaskInput");var txt=inp.value.trim();if(!txt)return;
   var s=getState();if(!s)return;
   var pd=getTodayPlanDay();var tk=getDayKey(pd);
   if(!s.customTasks)s.customTasks={};if(!s.customTasks[tk])s.customTasks[tk]=[];
@@ -276,9 +214,31 @@ function removeCustomTask(idx){
   }
   saveState(s);render()
 }
+function prevDay(){
+  var s=getState();if(!s)return;
+  var pd=getTodayPlanDay();if(s.viewDay!==undefined)pd=s.viewDay;
+  if(pd>1){pd--;s.viewDay=pd;saveState(s);render()}
+}
+function nextDay(){
+  var s=getState();if(!s)return;
+  var pd=getTodayPlanDay();if(s.viewDay!==undefined)pd=s.viewDay;
+  if(pd<86){pd++;s.viewDay=pd;saveState(s);render()}
+}
+function goToToday(){
+  var s=getState();if(!s)return;
+  delete s.viewDay;saveState(s);render()
+}
 function confirmReset(){
-  if(!confirm("确定要重置所有进度吗？这将清除所有学习记录和自定义任务。"))return;
-  localStorage.removeItem("neike_plan_state");render()
+  if(!confirm("确定要重置所有进度吗？这将清除所有学习记录、自定义任务和浏览历史。"))return;
+  localStorage.removeItem("neike_plan_state");
+  document.getElementById("startScreen").style.display="";
+  document.getElementById("mainContent").style.display="none";
+  var h1=document.querySelector(".start-screen h1");
+  var p=document.querySelector(".start-screen p");
+  var btn=document.querySelector(".start-btn");
+  if(h1)h1.textContent="内科滚动复习计划";
+  if(p)p.innerHTML="基于艾宾浩斯遗忘曲线，86天完整复习旅程。<br>每天推送学习内容与复习计划，点击打勾完成，进度随时可见。";
+  if(btn)btn.textContent="开始计划"
 }
 document.addEventListener("DOMContentLoaded",function(){
   render();
@@ -286,7 +246,6 @@ document.addEventListener("DOMContentLoaded",function(){
   t.setDate(t.getDate()+1);t.setHours(0,0,0,0);
   setTimeout(function(){render();setInterval(render,3600000)},t-n+1000)
 })
-
 </script>
 </body>
 </html>
