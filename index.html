@@ -251,9 +251,9 @@ var ctx=canvas.getContext("2d");
 var particles=[];
 var fireworksActive=false;
 
-function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
-window.addEventListener("resize",resizeCanvas);
-resizeCanvas();
+function resizeCanvas(){if(!canvas)canvas=document.getElementById("fireworksCanvas");if(canvas){canvas.width=window.innerWidth;canvas.height=window.innerHeight}}
+window.addEventListener("resize",function(){var c=document.getElementById("fireworksCanvas");if(c){c.width=window.innerWidth;c.height=window.innerHeight}});
+
 
 function createFirework(x,y){
   var colors=["#ff0","#f0f","#0ff","#f00","#0f0","#00f","#ff8800","#ff44aa","#44ffaa","#aaff44"];
@@ -311,6 +311,7 @@ function startFireworks(){
   animate()
 }
 
+var canvas=document.getElementById("fireworksCanvas");if(canvas)resizeCanvas();
 document.addEventListener("DOMContentLoaded",function(){
   render();
   var n=new Date();var t=new Date(n);
