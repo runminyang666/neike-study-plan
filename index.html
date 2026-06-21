@@ -187,7 +187,7 @@ function updateStats(s,tk,td){
 function startPlan(){
   var s=getState();
   if(s&&s.startDate&&!confirm("已有进度，确定重新开始吗？"))return;
-  var t=new Date();var ns={startDate:t.toISOString().split("T")[0],completed:{},customTasks:{}};
+  var t=new Date();var ns={startDate:t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"),completed:{},customTasks:{}};
   saveState(ns);render()
 }
 function toggleTask(id){
