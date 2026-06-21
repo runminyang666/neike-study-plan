@@ -361,7 +361,7 @@ function createFirework(x,y){
     })
   }
 }
-function animate(){if(!fireworksReady)return;
+function animate(){if(!)return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   for(var i=particles.length-1;i>=0;i--){
     var p=particles[i];
@@ -380,11 +380,7 @@ function animate(){if(!fireworksReady)return;
   if(fireworksActive||particles.length>0)requestAnimationFrame(animate)
 }
 
-function startFireworks(){if(!fireworksReady);if(!fireworksReady)return;
-  if(fireworksActive)return;
-  fireworksActive=true;
-  var count=0;
-  function burst(){
+function burst(){
     if(count>=3){fireworksActive=false;return}
     count++;
     var x=Math.random()*canvas.width*0.8+canvas.width*0.1;
