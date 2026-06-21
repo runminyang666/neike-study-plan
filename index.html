@@ -163,7 +163,8 @@ function render(){
       var dn=s.completed[di]===true;
       return '<div class="task-item"><div class="checkbox'+(dn?' checked':'')+'" onclick="toggleTask(\''+di+'\')"></div><div class="task-text'+(dn?' done':'')+'"><span class="task-label">复习</span>'+r.rs+'<div style="font-size:11px;color:#99b0c5;margin-top:2px">第'+r.rd+'天</div></div></div>'
     }).join("")
-  }else{rd.innerHTML='<div class="empty-state"><div class="icon">🎯</div><div>今天没有复习任务</div></div>'}
+  
+      }else{rd.innerHTML='<div class="empty-state"><div class="icon">🎯</div><div>今天没有复习任务</div></div>'}
   renderCustomTasks(s,tk);
   updateStats(s,tk,td)
 }
