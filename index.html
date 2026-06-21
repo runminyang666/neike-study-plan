@@ -55,10 +55,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hira
 .date-nav .date-label{font-size:14px;font-weight:500;min-width:130px;text-align:center}
 .date-nav .today-btn{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.4)}
 .date-nav .today-btn:hover{background:rgba(255,255,255,0.35)}
-
-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999}
-.complete-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10000;font-size:28px;font-weight:700;color:#fff;text-shadow:0 0 20px rgba(0,0,0,0.5);text-align:center;pointer-events:none;display:none;animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.05)}}
 </style>
 </head>
 <body>
@@ -187,6 +183,104 @@ function updateStats(s,tk,td){
   var tasks=s.customTasks[tk]||[];tasks.forEach(function(t,i){total++;if(s.completed[tk+"_custom_"+i])done++});
   document.getElementById("completedCount").textContent=done;
   document.getElementById("totalCount").textContent=total
+
+  if(total>0&&done===total&&typeof startFireworks==='function'){startFireworks()}
+}
+function startPlan(){
+  var s=getState();
+  if(s&&s.startDate&&!confirm("已有进度，确定重新开始吗？"))return;
+  var t=new Date();var ns={startDate:t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"),completed:{},customTasks:{}};
+  saveState(ns);render()
+}
+function toggleTask(id){
+  var s=getState();if(!s)return;
+  if(!s.completed)s.completed={};s.completed[id]=!s.completed[id];saveState(s);render()
+}
+function addCustomTask(){
+  var inp=document.getElementById("newTaskInput");var txt=inp.value.trim();if(!txt)return;
+  var s=getState();if(!s)return;
+  var pd=getTodayPlanDay();var tk=getDayKey(pd);
+  if(!s.customTasks)s.customTasks={};if(!s.customTasks[tk])s.customTasks[tk]=[];
+  s.customTasks[tk].push({text:txt});saveState(s);inp.value="";render()
+}
+function removeCustomTask(idx){
+  var s=getState();if(!s)return;
+  var pd=getTodayPlanDay();var tk=getDayKey(pd);
+  if(!s.customTasks[tk])return;
+  s.customTasks[tk].splice(idx,1);
+  var di=tk+"_custom_"+idx;delete s.completed[di];
+  for(var i=idx;i<=s.customTasks[tk].length;i++){
+    var ok=tk+"_custom_"+(i+1);var nk=tk+"_custom_"+i;
+    if(s.completed[ok]!==undefined){s.completed[nk]=s.completed[ok];delete s.completed[ok]}
+    else{delete s.completed[nk]}
+  }
+  saveState(s);render()
+}
+function prevDay(){
+  var s=getState();if(!s)return;
+  var pd=getTodayPlanDay();if(s.viewDay!==undefined)pd=s.viewDay;
+  if(pd>1){pd--;s.viewDay=pd;saveState(s);render()}
+}
+function nextDay(){
+  var s=getState();if(!s)return;
+  var pd=getTodayPlanDay();if(s.viewDay!==undefined)pd=s.viewDay;
+  if(pd<86){pd++;s.viewDay=pd;saveState(s);render()}
+}
+function goToToday(){
+  var s=getState();if(!s)return;
+  delete s.viewDay;saveState(s);render()
+}
+function confirmReset(){
+  if(!confirm("确定要重置所有进度吗？这将清除所有学习记录、自定义任务和浏览历史。"))return;
+  localStorage.removeItem("neike_plan_state");
+  document.getElementById("startScreen").style.display="";
+  document.getElementById("mainContent").style.display="none";
+  var h1=document.querySelector(".start-screen h1");
+  var p=document.querySelector(".start-screen p");
+  var btn=document.querySelector(".start-btn");
+  if(h1)h1.textContent="内科滚动复习计划";
+  if(p)p.innerHTML="基于艾宾浩斯遗忘曲线，86天完整复习旅程。<br>每天推送学习内容与复习计划，点击打勾完成，进度随时可见。";
+  if(btn)btn.textContent="开始计划"
+}
+
+// Fireworks - DOM based
+var particles=[],fireworksActive=false;
+function createParticle(x,y){
+  for(var i=0;i<50;i++){
+    var angle=Math.random()*Math.PI*2;
+    var speed=Math.random()*8+2;
+    var el=document.createElement("div");
+    el.style.cssText="position:fixed;left:"+x+"px;top:"+y+"px;width:"+(Math.random()*4+2)+"px;height:"+(Math.random()*4+2)+"px;border-radius:50%;background:"+["#ff0","#f0f","#0ff","#f00","#0f0","#00f","#ff8800","#ff44aa","#44ffaa","#ff6666","#66ff66","#6666ff","#ffcc00"][Math.floor(Math.random()*13)]+";pointer-events:none;z-index:99999;transition:all "+(Math.random()*1+0.8)+"s ease-out";
+    el.style.transform="translate("+Math.cos(angle)*speed*15+"px,"+Math.sin(angle)*speed*15+"px)";
+    el.style.opacity="1";
+    document.body.appendChild(el);
+    var vy=Math.sin(angle)*speed*15;
+    setTimeout(function(e){return function(){e.style.opacity="0";setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},1000)}}(el),600)
+  }
+}
+function startFireworks(){
+  if(fireworksActive)return;
+  fireworksActive=true;
+  var count=0;
+  function burst(){
+    if(count>=5){fireworksActive=false;return}
+    count++;
+    createParticle(Math.random()*window.innerWidth*0.8+window.innerWidth*0.1,Math.random()*window.innerHeight*0.6+window.innerHeight*0.1);
+    setTimeout(burst,400+Math.random()*400)
+  }
+  burst();
+  var msg=document.createElement("div");
+  msg.id="completeMsg";
+  msg.style.cssText="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100000;font-size:36px;font-weight:700;color:#fff;text-shadow:0 0 30px rgba(0,0,0,0.7);text-align:center;pointer-events:none;animation:fwpulse 1.5s ease-in-out infinite;font-family:sans-serif";
+  msg.textContent="🎉 今日任务全部完成！";
+  document.body.appendChild(msg);
+  setTimeout(function(){var m=document.getElementById("completeMsg");if(m&&m.parentNode)m.parentNode.removeChild(m)},5000)
+}
+// Add CSS animation
+if(!document.getElementById("fwStyle")){
+  var st=document.createElement("style");st.id="fwStyle";
+  st.textContent="@keyframes fwpulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}";
+  document.head.appendChild(st)
 }
 function startPlan(){
   var s=getState();
@@ -246,16 +340,7 @@ function confirmReset(){
 }
 
 // Fireworks
-var canvas,ctx,particles=[],fireworksActive=false,fireworksReady=false;
-function initFireworks(){
-  canvas=document.getElementById("fireworksCanvas");
-  if(!canvas)return;
-  ctx=canvas.getContext("2d");
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
-  fireworksReady=true
-}
-window.addEventListener("resize",function(){if(canvas){canvas.width=window.innerWidth;canvas.height=window.innerHeight}});
+
 
 
 function createFirework(x,y){
@@ -295,7 +380,7 @@ function animate(){if(!fireworksReady)return;
   if(fireworksActive||particles.length>0)requestAnimationFrame(animate)
 }
 
-function startFireworks(){if(!fireworksReady)initFireworks();if(!fireworksReady)return;
+function startFireworks(){if(!fireworksReady);if(!fireworksReady)return;
   if(fireworksActive)return;
   fireworksActive=true;
   var count=0;
@@ -314,8 +399,7 @@ function startFireworks(){if(!fireworksReady)initFireworks();if(!fireworksReady)
   animate()
 }
 
-var canvas=document.getElementById("fireworksCanvas");if(canvas)resizeCanvas();
-document.addEventListener("DOMContentLoaded",function(){
+var canvas=document.addEventListener("DOMContentLoaded",function(){
   render();
   var n=new Date();var t=new Date(n);
   t.setDate(t.getDate()+1);t.setHours(0,0,0,0);
@@ -323,7 +407,5 @@ document.addEventListener("DOMContentLoaded",function(){
 })
 </script>
 
-<canvas id="fireworksCanvas"></canvas>
-<div class="complete-msg" id="completeMsg">🎉 今日任务全部完成！</div>
 </body>
 </html>
